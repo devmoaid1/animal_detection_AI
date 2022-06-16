@@ -1,86 +1,122 @@
+import 'package:animal_detection/Ui/Home/home_viewmodel.dart';
+import 'package:animal_detection/app/screensizing.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:stacked/stacked.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+import '../widgets/AppButton.dart';
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final screenHelper = ScreenSizeHelper();
+
+    screenHelper.init(context);
+
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        backgroundColor: Theme.of(context).backgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          centerTitle: true,
+          title: Text(
+            'Animal Detection',
+            style: GoogleFonts.lobster(
+                fontSize: screenHelper.blockScreenSizeHorizontal! * 8,
+                fontWeight: FontWeight.w500),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: ViewModelBuilder<HomeViewModel>.reactive(
+            viewModelBuilder: () => HomeViewModel(),
+            fireOnModelReadyOnce: true,
+            onModelReady: (model) => model.loadModel(),
+            builder: (context, model, _) {
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenHelper.blockScreenSizeHorizontal! * 5,
+                  vertical: screenHelper.blockScreenSizeVertical! * 6,
+                ),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  elevation: 2,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenHelper.blockScreenSizeHorizontal! * 5,
+                      vertical: screenHelper.blockScreenSizeVertical! * 6,
+                    ),
+                    width: screenHelper.screenWidth,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(seconds: 2),
+                          child: model.isLoading
+                              ? Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical:
+                                        screenHelper.blockScreenSizeVertical! *
+                                            5,
+                                  ),
+                                  child: Center(
+                                    key: const Key('loading'),
+                                    child: CircularProgressIndicator(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  key: const Key('image'),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: SizedBox(
+                                            height: screenHelper.screenHeight! *
+                                                0.3,
+                                            width:
+                                                screenHelper.screenWidth! * 0.5,
+                                            child: Image.file(model.image,
+                                                fit: BoxFit.fill)),
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      model.output != null
+                                          ? Text(
+                                              'This is animal is : ${model.output[0]['label']}',
+                                              style: GoogleFonts.poppins(
+                                                  color: Colors.white,
+                                                  fontSize: screenHelper
+                                                          .blockScreenSizeHorizontal! *
+                                                      4,
+                                                  fontWeight: FontWeight.w600),
+                                            )
+                                          : Container()
+                                    ],
+                                  ),
+                                ),
+                        ),
+                        SizedBox(
+                          height: screenHelper.blockScreenSizeVertical! * 10,
+                        ),
+                        AppButton(
+                            handleTap: () => model.pickCameraImage(),
+                            title: 'Pick from camera '),
+                        SizedBox(
+                          height: screenHelper.blockScreenSizeVertical! * 3,
+                        ),
+                        AppButton(
+                            handleTap: () => model.pickGalleryImage(),
+                            title: 'Pick From Gallery'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }));
   }
 }
