@@ -12,11 +12,14 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../Ui/Home/home_view.dart';
+import '../Ui/splash%20screen/splash_screen.dart';
 
 class Routes {
-  static const String homePage = '/';
+  static const String homePage = '/home-page';
+  static const String splashScreen = '/';
   static const all = <String>{
     homePage,
+    splashScreen,
   };
 }
 
@@ -25,6 +28,7 @@ class StackedRouter extends RouterBase {
   List<RouteDef> get routes => _routes;
   final _routes = <RouteDef>[
     RouteDef(Routes.homePage, page: HomePage),
+    RouteDef(Routes.splashScreen, page: SplashScreen),
   ];
   @override
   Map<Type, StackedRouteFactory> get pagesMap => _pagesMap;
@@ -32,6 +36,12 @@ class StackedRouter extends RouterBase {
     HomePage: (data) {
       return CupertinoPageRoute<dynamic>(
         builder: (context) => const HomePage(),
+        settings: data,
+      );
+    },
+    SplashScreen: (data) {
+      return CupertinoPageRoute<dynamic>(
+        builder: (context) => const SplashScreen(),
         settings: data,
       );
     },
@@ -52,6 +62,22 @@ extension NavigatorStateExtension on NavigationService {
   }) async {
     return navigateTo(
       Routes.homePage,
+      id: routerId,
+      preventDuplicates: preventDuplicates,
+      parameters: parameters,
+      transition: transition,
+    );
+  }
+
+  Future<dynamic> navigateToSplashScreen({
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  }) async {
+    return navigateTo(
+      Routes.splashScreen,
       id: routerId,
       preventDuplicates: preventDuplicates,
       parameters: parameters,

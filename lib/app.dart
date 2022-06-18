@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
       title: 'Animal Detection',
       theme: ThemeData(
           primarySwatch: Colors.red,
-          cardColor: const Color(0xFF1A1A1A),
+          cardColor: const Color(0xFF101010),
           primaryColor: const Color(0xFFFD057F),
           backgroundColor: Colors.black),
       navigatorKey: StackedService.navigatorKey,

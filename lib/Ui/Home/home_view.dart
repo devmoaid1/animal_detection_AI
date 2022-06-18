@@ -1,18 +1,16 @@
 import 'package:animal_detection/Ui/Home/home_viewmodel.dart';
-import 'package:animal_detection/app/screensizing.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../app/constants.dart';
 import '../widgets/AppButton.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final screenHelper = ScreenSizeHelper();
-
-    screenHelper.init(context);
+    // screenHelper.init(context)
 
     return Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
@@ -51,55 +49,13 @@ class HomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         AnimatedSwitcher(
-                          duration: const Duration(seconds: 2),
-                          child: model.isLoading
-                              ? Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical:
-                                        screenHelper.blockScreenSizeVertical! *
-                                            5,
-                                  ),
-                                  child: Center(
+                            duration: const Duration(seconds: 1),
+                            child: model.isLoading
+                                ? Container(
+                                    height: screenHelper.screenHeight! * 0.35,
                                     key: const Key('loading'),
-                                    child: CircularProgressIndicator(
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  key: const Key('image'),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: SizedBox(
-                                            height: screenHelper.screenHeight! *
-                                                0.3,
-                                            width:
-                                                screenHelper.screenWidth! * 0.5,
-                                            child: Image.file(model.image,
-                                                fit: BoxFit.fill)),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      model.output != null
-                                          ? Text(
-                                              'This is animal is : ${model.output[0]['label']}',
-                                              style: GoogleFonts.poppins(
-                                                  color: Colors.white,
-                                                  fontSize: screenHelper
-                                                          .blockScreenSizeHorizontal! *
-                                                      4,
-                                                  fontWeight: FontWeight.w600),
-                                            )
-                                          : Container()
-                                    ],
-                                  ),
-                                ),
-                        ),
+                                  )
+                                : const AnimalCard()),
                         SizedBox(
                           height: screenHelper.blockScreenSizeVertical! * 10,
                         ),
@@ -118,5 +74,40 @@ class HomePage extends StatelessWidget {
                 ),
               );
             }));
+  }
+}
+
+class AnimalCard extends ViewModelWidget<HomeViewModel> {
+  const AnimalCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, HomeViewModel viewModel) {
+    return Container(
+      key: const Key('image'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+                height: screenHelper.screenHeight! * 0.3,
+                width: screenHelper.screenWidth! * 0.5,
+                child: Image.file(viewModel.image, fit: BoxFit.fill)),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          viewModel.output != null
+              ? Text(
+                  'This is animal is : ${viewModel.output[0]['label']}',
+                  style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: screenHelper.blockScreenSizeHorizontal! * 4,
+                      fontWeight: FontWeight.w600),
+                )
+              : Container()
+        ],
+      ),
+    );
   }
 }
